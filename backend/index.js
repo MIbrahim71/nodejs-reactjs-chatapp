@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const { default: axios } = require("axios");
 
 // import express which runs HTTP server
 // import cors so this server can be called from any other origin
@@ -11,6 +12,20 @@ app.use(cors({ origin: true }));
 // username taken from request body and fake user object returned (not real authentication)
 app.post("/authenticate", async (req, res) => {
   const { username } = req.body;
+
+  try {
+    const response = await axios.put(
+      "https://api.chatengine.io/users/",
+      { username: username, secret: username, first_name: username },
+      // headers to authenticate API call with private API key
+      { headers: { "private-key": "36e329a9-bd4b-4432-8978-3df42cfbdb28" } }
+    );
+
+    return res.status(response.status).json(response.data);
+  } catch (e) {
+    return res.status(e.response.status).json(e.response.data);
+  }
+
   return res.json({ username: username, secret: "sha256..." });
 });
 
